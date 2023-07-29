@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,37 +12,15 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func main() {
-
-	// read GITHUB_TOKEN from environment variable
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		log.Error("GITHUB_TOKEN environment variable is not set")
-		os.Exit(1)
-	}
-
-	org := flag.String("org", "", "organization name")
-	repo := flag.String("repo", "", "repository name")
-
-	flag.Parse()
-	if *org == "" {
-		log.Error("organization name is not set")
-		os.Exit(1)
-	}
-	if *repo == "" {
-		log.Error("repository name is not set")
-		os.Exit(1)
-	}
-
+func printRepositoryInfo(ctx context.Context, org, repo, token string) {
 	// get repository information
-	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	repoInfo, _, err := client.Repositories.Get(ctx, *org, *repo)
+	repoInfo, _, err := client.Repositories.Get(ctx, org, repo)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -80,5 +57,4 @@ func main() {
 	fmt.Println(subscribers)
 	fmt.Println(network)
 	fmt.Println(watchers)
-
 }
