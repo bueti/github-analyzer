@@ -1,17 +1,31 @@
 package main
 
 import (
+	"flag"
 	"net/http"
+	"os"
 
 	"github.com/charmbracelet/log"
 )
 
 func main() {
+	addrFlag := flag.String("addr", "4000", "HTTP network address")
+	flag.Parse()
+	addr := ":" + *addrFlag
+
+	logger := log.NewWithOptions(os.Stdout, log.Options{
+		ReportTimestamp: true,
+		ReportCaller:    true,
+	})
+
 	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/v1/repo/view", repoView)
 
-	log.Info("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
+	logger.Info("Starting server", "addr", *addrFlag)
+	err := http.ListenAndServe(addr, mux)
+	logger.Fatal(err)
 }

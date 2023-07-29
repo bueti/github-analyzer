@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -12,7 +13,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Hello from Github Analyzer"))
+	files := []string{
+		"./ui/html/base.go.html",
+		"./ui/html/partials/nav.go.html",
+		"./ui/html/pages/home.go.html",
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
 }
 
 func repoView(w http.ResponseWriter, r *http.Request) {
