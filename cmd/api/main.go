@@ -2,30 +2,43 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 
-	"github.com/charmbracelet/log"
+	"github.com/charmbracelet/lipgloss"
 )
+
+type application struct {
+	infoLog  *log.Logger
+	errorLog *log.Logger
+}
 
 func main() {
 	addrFlag := flag.String("addr", "4000", "HTTP network address")
 	flag.Parse()
 	addr := ":" + *addrFlag
 
-	logger := log.NewWithOptions(os.Stdout, log.Options{
-		ReportTimestamp: true,
-		ReportCaller:    true,
-	})
+	infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#00d7ff"))
+	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff005f"))
+	infoStr := infoStyle.Render("INFO\t")
+	errorStr := errorStyle.Render("ERROR\t")
+	infoLog := log.New(os.Stdout, fmt.Sprintf("%s ", infoStr), log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stdout, fmt.Sprintf("%s ", errorStr), log.Ldate|log.Ltime|log.Lshortfile)
 
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	app := &application{
+		infoLog:  infoLog,
+		errorLog: errorLog,
+	}
 
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/v1/repo/view", repoView)
+	srv := &http.Server{
+		Addr:     addr,
+		ErrorLog: errorLog,
+		Handler:  app.routes(),
+	}
 
-	logger.Info("Starting server", "addr", *addrFlag)
-	err := http.ListenAndServe(addr, mux)
-	logger.Fatal(err)
+	app.infoLog.Printf("Starting server on port %s", *addrFlag)
+	err := srv.ListenAndServe()
+	app.infoLog.Fatal(err)
 }

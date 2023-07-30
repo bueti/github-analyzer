@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
-	"github.com/charmbracelet/log"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -20,29 +18,25 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 	}
 }
 
-func repoView(w http.ResponseWriter, r *http.Request) {
+func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 	org := r.URL.Query().Get("org")
 	if org == "" {
-		log.Error("organization name is not set")
-		http.Error(w, "organization name is not set", http.StatusBadRequest)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 	repo := r.URL.Query().Get("repo")
 	if repo == "" {
-		log.Error("repository name is not set")
-		http.Error(w, "repository name is not set", http.StatusBadRequest)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
