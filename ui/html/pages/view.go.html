@@ -1,0 +1,17 @@
+{{define "title"}}Repository #{{.Repo.Name}}{{end}}
+
+{{define "main"}}
+{{with .Repo}}
+<div class='snippet'>
+    <div class='metadata'>
+        <strong>{{.Repo.Name}}</strong>
+        <span>#{{.Repo.Language}}</span>
+    </div>
+    <div class="metadata">{{.Repo.Description}}</div>
+    <div class='metadata'>
+        <time>Forks: {{.Repo.Forks}}</time>
+        <time>Watchers: {{.Repo.Watchers}}</time>
+    </div>
+</div>
+{{end}}
+{{end}}

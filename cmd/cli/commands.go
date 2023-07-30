@@ -44,7 +44,6 @@ func printRepositoryInfo(ctx context.Context, org, repo, token string) {
 	forks := lipgloss.JoinHorizontal(lipgloss.Top, nameStyle.Render("Forks: "), detailStyle.Render(strconv.Itoa(repoInfo.GetForksCount())))
 	openIssues := lipgloss.JoinHorizontal(lipgloss.Top, nameStyle.Render("Open Issues: "), detailStyle.Render(strconv.Itoa(repoInfo.GetOpenIssuesCount())))
 	subscribers := lipgloss.JoinHorizontal(lipgloss.Top, nameStyle.Render("Subscribers: "), detailStyle.Render(strconv.Itoa(repoInfo.GetSubscribersCount())))
-	network := lipgloss.JoinHorizontal(lipgloss.Top, nameStyle.Render("Network: "), detailStyle.Render(strconv.Itoa(repoInfo.GetNetworkCount())))
 	watchers := lipgloss.JoinHorizontal(lipgloss.Top, nameStyle.Render("Watchers: "), detailStyle.Render(strconv.Itoa(repoInfo.GetWatchersCount())))
 
 	fmt.Println(titleStyle.Render("Repository Information"))
@@ -55,6 +54,5 @@ func printRepositoryInfo(ctx context.Context, org, repo, token string) {
 	fmt.Println(forks)
 	fmt.Println(openIssues)
 	fmt.Println(subscribers)
-	fmt.Println(network)
 	fmt.Println(watchers)
 }
