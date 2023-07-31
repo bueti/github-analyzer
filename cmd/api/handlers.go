@@ -1,8 +1,9 @@
 package main
 
 import (
-	"html/template"
 	"net/http"
+
+	"github.com/bueti/github-analyzer/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -10,21 +11,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	files := []string{
-		"./ui/html/base.go.html",
-		"./ui/html/partials/nav.go.html",
-		"./ui/html/pages/home.go.html",
-	}
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.render(w, http.StatusOK, "base.go.html", &templateData{
+		Repo: &models.Repo{},
+	})
 }
 
 func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
@@ -45,25 +35,7 @@ func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.go.html",
-		"./ui/html/partials/nav.go.html",
-		"./ui/html/pages/view.go.html",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{
+	app.render(w, http.StatusOK, "view.go.html", &templateData{
 		Repo: repoInfo,
-	}
-
-	// Pass in the templateData struct when executing the template.
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	})
 }

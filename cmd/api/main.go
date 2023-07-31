@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -15,9 +16,10 @@ import (
 )
 
 type application struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	repos    *models.RepoModel
+	infoLog       *log.Logger
+	errorLog      *log.Logger
+	repos         *models.RepoModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -40,6 +42,12 @@ func main() {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errorLog,
@@ -47,6 +55,7 @@ func main() {
 			Client: github.NewClient(tc),
 			Ctx:    ctx,
 		},
+		templateCache: templateCache,
 	}
 
 	srv := &http.Server{
@@ -56,6 +65,6 @@ func main() {
 	}
 
 	app.infoLog.Printf("Starting server on port %s", *addrFlag)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	app.infoLog.Fatal(err)
 }

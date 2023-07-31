@@ -4,13 +4,13 @@
 {{with .Repo}}
 <div class='snippet'>
     <div class='metadata'>
-        <strong>{{.Repo.Name}}</strong>
-        <span>#{{.Repo.Language}}</span>
+        <strong>{{.Name}}</strong>
+        <span>#{{.Language}}</span>
     </div>
-    <div class="metadata">{{.Repo.Description}}</div>
+    <div class="metadata">{{.Description}}</div>
     <div class='metadata'>
-        <time>Forks: {{.Repo.Forks}}</time>
-        <time>Watchers: {{.Repo.Watchers}}</time>
+        <time>Forks: {{.Forks}}</time>
+        <time>Watchers: {{.Watchers}}</time>
     </div>
 </div>
 {{end}}
