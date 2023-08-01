@@ -2,31 +2,28 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
 	data := app.newTemplateData(r)
-	app.render(w, http.StatusOK, "base.go.html", data)
+	app.render(w, http.StatusOK, "home.go.html", data)
 }
 
 func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
-	org := r.URL.Query().Get("org")
-	if org == "" {
+	params := httprouter.ParamsFromContext(r.Context())
+
+	if params.ByName("org") == "" {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	repo := r.URL.Query().Get("repo")
-	if repo == "" {
+	if params.ByName("repo") == "" {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	repoInfo, err := app.repos.Get(org, repo)
+	repoInfo, err := app.repos.Get(params.ByName("org"), params.ByName("repo"))
 	if err != nil {
 		app.serverError(w, err)
 		return
