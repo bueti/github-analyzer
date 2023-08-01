@@ -5,11 +5,17 @@
 <form action='/v1/repo/view' method='POST'>
     <div>
         <label>Organization Name:</label>
-        <input type='text' name='org'>
+        {{with .Form.FieldErrors.org}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='text' name='org' value='{{.Form.Org}}'>
     </div>
     <div>
         <label>Repository Name:</label>
-        <input type='text' name='repo'>
+        {{with .Form.FieldErrors.repo}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='text' name='repo', value='{{.Form.Repo}}'>
     </div>
     <div>
         <input type='submit' value='Query Github'>

@@ -16,7 +16,6 @@ type Repo struct {
 	Forks       int
 	OpenIssues  int
 	Subscribers int
-	Watchers    int
 	CreatedAt   time.Time
 }
 
@@ -39,7 +38,6 @@ func (r *RepoModel) Get(org, name string) (*Repo, error) {
 	repo.Forks = repoInfo.GetForksCount()
 	repo.OpenIssues = repoInfo.GetOpenIssuesCount()
 	repo.Subscribers = repoInfo.GetSubscribersCount()
-	repo.Watchers = repoInfo.GetWatchersCount()
 	repo.CreatedAt = repoInfo.GetCreatedAt().UTC()
 
 	return repo, nil

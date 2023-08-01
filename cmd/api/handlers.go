@@ -2,10 +2,19 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/bueti/github-analyzer/internal/validator"
 )
+
+type repoViewForm struct {
+	Org  string
+	Repo string
+	validator.Validator
+}
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
+	data.Form = repoViewForm{}
 	app.render(w, http.StatusOK, "home.go.html", data)
 }
 
@@ -15,10 +24,25 @@ func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	org := r.PostForm.Get("org")
-	repo := r.PostForm.Get("repo")
 
-	repoInfo, err := app.repos.Get(org, repo)
+	form := repoViewForm{
+		Org:  r.PostForm.Get("org"),
+		Repo: r.PostForm.Get("repo"),
+	}
+
+	form.CheckField(validator.NotBlank(form.Org), "org", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Org, 39), "org", "This field cannot be more than 39 characters long")
+	form.CheckField(validator.NotBlank(form.Repo), "repo", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Repo, 100), "repo", "This field cannot be more than 100 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "home.go.html", data)
+		return
+	}
+
+	repoInfo, err := app.repos.Get(form.Org, form.Repo)
 	if err != nil {
 		app.serverError(w, err)
 		return

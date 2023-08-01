@@ -13,6 +13,7 @@ import (
 type templateData struct {
 	CurrentYear int
 	Repo        *models.Repo
+	Form        any
 }
 
 func (app *application) newTemplateData(r *http.Request) *templateData {
