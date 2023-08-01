@@ -18,6 +18,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.go.html", data)
 }
 
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "about.go.html", data)
+}
+
 func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
