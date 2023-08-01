@@ -2,8 +2,6 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/bueti/github-analyzer/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -12,9 +10,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, "base.go.html", &templateData{
-		Repo: &models.Repo{},
-	})
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "base.go.html", data)
 }
 
 func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +32,8 @@ func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, "view.go.html", &templateData{
-		Repo: repoInfo,
-	})
+	data := app.newTemplateData(r)
+	data.Repo = repoInfo
+
+	app.render(w, http.StatusOK, "view.go.html", data)
 }

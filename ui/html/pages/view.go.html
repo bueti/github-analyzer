@@ -5,12 +5,20 @@
 <div class='snippet'>
     <div class='metadata'>
         <strong>{{.Name}}</strong>
-        <span>#{{.Language}}</span>
+        <div class="metadata">
+            {{.Description}}
+        </div>
+        <div class="metadata">
+            <ul>
+                <li><a href='https://github.com/{{.Org}}/{{.Name}}/issues'>{{.OpenIssues}} issues</a></li>
+                <li><a href='https://github.com/{{.Org}}/{{.Name}}/stars'>{{.Stars}} stars</a></li>
+                <li><a href='https://github.com/{{.Org}}/{{.Name}}/forks'>{{.Forks}} forks</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="metadata">{{.Description}}</div>
     <div class='metadata'>
-        <time>Forks: {{.Forks}}</time>
-        <time>Watchers: {{.Watchers}}</time>
+        <time>Created: {{humanDate .CreatedAt}}</time>
+        <time>Language: {{.Language}}</time>
     </div>
 </div>
 {{end}}

@@ -2,11 +2,13 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/go-github/v53/github"
 )
 
 type Repo struct {
+	Org         string
 	Name        string
 	Description string
 	Stars       int
@@ -15,6 +17,7 @@ type Repo struct {
 	OpenIssues  int
 	Subscribers int
 	Watchers    int
+	CreatedAt   time.Time
 }
 
 type RepoModel struct {
@@ -28,6 +31,7 @@ func (r *RepoModel) Get(org, name string) (*Repo, error) {
 	if err != nil {
 		return nil, err
 	}
+	repo.Org = org
 	repo.Name = repoInfo.GetName()
 	repo.Description = repoInfo.GetDescription()
 	repo.Stars = repoInfo.GetStargazersCount()
@@ -36,6 +40,7 @@ func (r *RepoModel) Get(org, name string) (*Repo, error) {
 	repo.OpenIssues = repoInfo.GetOpenIssuesCount()
 	repo.Subscribers = repoInfo.GetSubscribersCount()
 	repo.Watchers = repoInfo.GetWatchersCount()
+	repo.CreatedAt = repoInfo.GetCreatedAt().UTC()
 
 	return repo, nil
 }
