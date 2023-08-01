@@ -1,0 +1,9 @@
+services:
+  server:
+    build:
+      context: .
+      target: final
+    ports:
+      - 4000:4000
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
