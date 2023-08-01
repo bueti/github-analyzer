@@ -1,6 +1,18 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-<h2>Latest Snippets</h2>
-<p>There's nothing to see here yet!</p>
+<h2>Query a Github Repository</h2>
+<form action='/v1/repo/view' method='POST'>
+    <div>
+        <label>Organization Name:</label>
+        <input type='text' name='org'>
+    </div>
+    <div>
+        <label>Repository Name:</label>
+        <input type='text' name='repo'>
+    </div>
+    <div>
+        <input type='submit' value='Query Github'>
+    </div>
+</form>
 {{end}}

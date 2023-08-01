@@ -2,8 +2,6 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -12,18 +10,15 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
-	params := httprouter.ParamsFromContext(r.Context())
-
-	if params.ByName("org") == "" {
+	err := r.ParseForm()
+	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	if params.ByName("repo") == "" {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
+	org := r.PostForm.Get("org")
+	repo := r.PostForm.Get("repo")
 
-	repoInfo, err := app.repos.Get(params.ByName("org"), params.ByName("repo"))
+	repoInfo, err := app.repos.Get(org, repo)
 	if err != nil {
 		app.serverError(w, err)
 		return
