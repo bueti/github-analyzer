@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/bueti/github-analyzer/internal/models"
 	"github.com/bueti/github-analyzer/internal/validator"
 )
 
@@ -49,6 +51,18 @@ func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 
 	repoInfo, err := app.repos.Get(form.Org, form.Repo)
 	if err != nil {
+		data := app.newTemplateData(r)
+		data.Form = form
+		if errors.Is(err, models.RepoNotFound) {
+			data.Flash = "Organization or repository not found!"
+			app.render(w, http.StatusOK, "home.go.html", data)
+			return
+		}
+		if errors.Is(err, models.NotAuthorized) {
+			data.Flash = "You are not authorized to view this repository! Did you set a GITHUB_TOKEN?"
+			app.render(w, http.StatusOK, "home.go.html", data)
+			return
+		}
 		app.serverError(w, err)
 		return
 	}

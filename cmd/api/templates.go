@@ -14,6 +14,7 @@ type templateData struct {
 	CurrentYear int
 	Repo        *models.Repo
 	Form        any
+	Flash       string
 }
 
 func (app *application) newTemplateData(r *http.Request) *templateData {
