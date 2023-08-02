@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/bueti/github-analyzer/internal/models"
 	"github.com/bueti/github-analyzer/internal/validator"
 )
 
@@ -49,6 +51,12 @@ func (app *application) repoView(w http.ResponseWriter, r *http.Request) {
 
 	repoInfo, err := app.repos.Get(form.Org, form.Repo)
 	if err != nil {
+		if errors.Is(err, models.RepoNotFound) {
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, http.StatusOK, "home.go.html", data)
+			return
+		}
 		app.serverError(w, err)
 		return
 	}
