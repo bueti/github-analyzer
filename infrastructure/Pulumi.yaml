@@ -1,0 +1,3 @@
+name: gha
+runtime: go
+description: Github Analyzer CloudRun

@@ -1,0 +1,12 @@
+secretsprovider: gcpkms://projects/bens-playground-394614/locations/europe-west1/keyRings/pulumi/cryptoKeys/gha
+encryptedkey: CiQAdGN2pVD5ScwIrSjWkAq5rWhQQMAsk2uZd9SXyhZpD6ND4L0SSQB4uRaYIbaOhDfnR9tj3SevN3HuerQDcc6GDYC8Xbjd3NmntnYIP5hCwGbB8sGnfYeIK6llxsgU91FUOU9qXLBc5NYmEhSGP24=
+config:
+  gcp:project: bens-playground-394614
+  gcp:region: europe-west1
+  run:serviceName: gha-server
+  run:concurrency: "80"
+  run:containerPort: "4000"
+  run:cpu: "1000m"
+  run:imageName: bueti/gha-server:v1.0.1
+  run:memory: 128Mi
+  run:domain: gha.bueti-online.ch
