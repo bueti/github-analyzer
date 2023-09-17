@@ -25,37 +25,11 @@ func main() {
 		_, err := cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
 			Location: pulumi.String(region),
 			Metadata: &cloudrun.ServiceMetadataArgs{
-				Annotations: pulumi.StringMap{
-					"run.googleapis.com/client-name":    pulumi.String("cloud-console"),
-					"run.googleapis.com/ingress":        pulumi.String("all"),
-					"run.googleapis.com/ingress-status": pulumi.String("all"),
-					"run.googleapis.com/operation-id":   pulumi.String("48d2d5a7-52c8-4969-9b2c-bb79c85a831e"),
-					"serving.knative.dev/creator":       pulumi.String("2010southafrica@gmail.com"),
-					"serving.knative.dev/lastModifier":  pulumi.String("2010southafrica@gmail.com"),
-				},
-				Labels: pulumi.StringMap{
-					"cloud.googleapis.com/location": pulumi.String(region),
-					"gcb-trigger-id":                pulumi.String("c5a72a2d-1d2a-4d1c-8efa-df0b8880bdad"),
-					"gcb-trigger-region":            pulumi.String("global"),
-					"managed-by":                    pulumi.String("gcp-cloud-build-deploy-cloud-run"),
-				},
 				Namespace: pulumi.String(project),
 			},
 			Name:    pulumi.String(serviceName),
 			Project: pulumi.String(project),
 			Template: &cloudrun.ServiceTemplateArgs{
-				Metadata: &cloudrun.ServiceTemplateMetadataArgs{
-					Annotations: pulumi.StringMap{
-						"autoscaling.knative.dev/maxScale":         pulumi.String("2"),
-						"run.googleapis.com/client-name":           pulumi.String("cloud-console"),
-						"run.googleapis.com/execution-environment": pulumi.String("gen1"),
-						"run.googleapis.com/startup-cpu-boost":     pulumi.String("true"),
-					},
-					Labels: pulumi.StringMap{
-						"client.knative.dev/nonce":            pulumi.String("8784e239-ddaf-4820-af94-4e1c6ad2ff2c"),
-						"run.googleapis.com/startupProbeType": pulumi.String("Default"),
-					},
-				},
 				Spec: &cloudrun.ServiceTemplateSpecArgs{
 					ContainerConcurrency: pulumi.Int(concurrency),
 					Containers: cloudrun.ServiceTemplateSpecContainerArray{
