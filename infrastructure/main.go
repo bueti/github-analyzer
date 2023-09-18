@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/pulumi/pulumi-gcp/sdk/v6/go/gcp/cloudrun"
+	"github.com/pulumi/pulumi-gcp/sdk/v6/go/gcp/secretmanager"
+	"github.com/pulumi/pulumi-gcp/sdk/v6/go/gcp/serviceaccount"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
@@ -19,10 +21,40 @@ func main() {
 		containerPort := conf.GetInt("containerPort")
 		cpu := conf.Get("cpu")
 		memory := conf.Get("memory")
+		secretName := conf.Get("secret")
 		// TODO: Add DomainMapping
-		//domain := conf.Get("domain")
 
-		_, err := cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
+		serviceAccount, err := serviceaccount.NewAccount(ctx, serviceName, &serviceaccount.AccountArgs{
+			AccountId:   pulumi.String(serviceName),
+			DisplayName: pulumi.String(serviceName),
+			Project:     pulumi.String(project),
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = serviceaccount.NewIAMBinding(ctx, "gha-server", &serviceaccount.IAMBindingArgs{
+			Members: pulumi.StringArray{
+				pulumi.String("serviceAccount:" + serviceName + "@" + project + ".iam.gserviceaccount.com"),
+			},
+			Role:             pulumi.String("roles/iam.serviceAccountUser"),
+			ServiceAccountId: serviceAccount.Name,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = secretmanager.NewSecretIamBinding(ctx, "gha-secret-accessor", &secretmanager.SecretIamBindingArgs{
+			SecretId: pulumi.String(secretName),
+			Role:     pulumi.String("roles/secretmanager.secretAccessor"),
+			Members: pulumi.StringArray{
+				pulumi.String("serviceAccount:" + serviceName + "@" + project + ".iam.gserviceaccount.com"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
 			Location: pulumi.String(region),
 			Metadata: &cloudrun.ServiceMetadataArgs{
 				Namespace: pulumi.String(project),
@@ -38,6 +70,7 @@ func main() {
 								&cloudrun.ServiceTemplateSpecContainerEnvArgs{
 									Name: pulumi.String("GITHUB_TOKEN"),
 									ValueFrom: &cloudrun.ServiceTemplateSpecContainerEnvValueFromArgs{
+										// TODO: Create secret with pulumi
 										SecretKeyRef: &cloudrun.ServiceTemplateSpecContainerEnvValueFromSecretKeyRefArgs{
 											Key:  pulumi.String("1"),
 											Name: pulumi.String("gha-token"),
@@ -49,7 +82,6 @@ func main() {
 							Ports: cloudrun.ServiceTemplateSpecContainerPortArray{
 								&cloudrun.ServiceTemplateSpecContainerPortArgs{
 									ContainerPort: pulumi.Int(containerPort),
-									Name:          pulumi.String("http1"),
 								},
 							},
 							Resources: &cloudrun.ServiceTemplateSpecContainerResourcesArgs{
@@ -58,28 +90,13 @@ func main() {
 									"memory": pulumi.String(memory),
 								},
 							},
-							StartupProbe: &cloudrun.ServiceTemplateSpecContainerStartupProbeArgs{
-								FailureThreshold: pulumi.Int(1),
-								PeriodSeconds:    pulumi.Int(240),
-								TcpSocket: &cloudrun.ServiceTemplateSpecContainerStartupProbeTcpSocketArgs{
-									Port: pulumi.Int(containerPort),
-								},
-								TimeoutSeconds: pulumi.Int(240),
-							},
 						},
 					},
-					// TODO: Generate ServiceAccount with Pulumi
-					ServiceAccountName: pulumi.String("33511728547-compute@developer.gserviceaccount.com"),
+					ServiceAccountName: serviceAccount.Email,
 					TimeoutSeconds:     pulumi.Int(300),
 				},
 			},
-			Traffics: cloudrun.ServiceTrafficArray{
-				&cloudrun.ServiceTrafficArgs{
-					LatestRevision: pulumi.Bool(true),
-					Percent:        pulumi.Int(100),
-				},
-			},
-		}, pulumi.Protect(true))
+		})
 		if err != nil {
 			return err
 		}

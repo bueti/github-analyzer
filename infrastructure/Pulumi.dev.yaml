@@ -10,3 +10,4 @@ config:
   run:imageName: bueti/gha-server:v1.0.1
   run:memory: 128Mi
   run:domain: gha.bueti-online.ch
+  run:secret: gha-token
