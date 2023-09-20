@@ -22,7 +22,7 @@ func main() {
 		cpu := conf.Get("cpu")
 		memory := conf.Get("memory")
 		secretName := conf.Get("secret")
-		// TODO: Add DomainMapping
+		domain := conf.Get("domain")
 
 		serviceAccount, err := serviceaccount.NewAccount(ctx, serviceName, &serviceaccount.AccountArgs{
 			AccountId:   pulumi.String(serviceName),
@@ -61,7 +61,7 @@ func main() {
 			return err
 		}
 
-		_, err = cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
+		service, err := cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
 			Location: pulumi.String(region),
 			Metadata: &cloudrun.ServiceMetadataArgs{
 				Namespace: pulumi.String(project),
@@ -106,6 +106,26 @@ func main() {
 		if err != nil {
 			return err
 		}
+
+		_, err = cloudrun.NewDomainMapping(ctx, "gha-domain-mapping", &cloudrun.DomainMappingArgs{
+			Name:     pulumi.String(domain),
+			Location: pulumi.String(region),
+			Project:  pulumi.String(project),
+			Metadata: &cloudrun.DomainMappingMetadataArgs{
+				Labels: pulumi.StringMap{
+					"cloud.googleapis.com/location": pulumi.String(region),
+				},
+				Namespace: pulumi.String(project), // Replace with your project id or number
+			},
+			Spec: &cloudrun.DomainMappingSpecArgs{
+				RouteName:       service.Name,
+				CertificateMode: pulumi.String("AUTOMATIC"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
