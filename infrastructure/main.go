@@ -54,6 +54,13 @@ func main() {
 			return err
 		}
 
+		secret, err := secretmanager.LookupSecret(ctx, &secretmanager.LookupSecretArgs{
+			SecretId: secretName,
+		}, nil)
+		if err != nil {
+			return err
+		}
+
 		_, err = cloudrun.NewService(ctx, serviceName, &cloudrun.ServiceArgs{
 			Location: pulumi.String(region),
 			Metadata: &cloudrun.ServiceMetadataArgs{
@@ -70,10 +77,9 @@ func main() {
 								&cloudrun.ServiceTemplateSpecContainerEnvArgs{
 									Name: pulumi.String("GITHUB_TOKEN"),
 									ValueFrom: &cloudrun.ServiceTemplateSpecContainerEnvValueFromArgs{
-										// TODO: Create secret with pulumi
 										SecretKeyRef: &cloudrun.ServiceTemplateSpecContainerEnvValueFromSecretKeyRefArgs{
 											Key:  pulumi.String("1"),
-											Name: pulumi.String("gha-token"),
+											Name: pulumi.String(secret.SecretId),
 										},
 									},
 								},
